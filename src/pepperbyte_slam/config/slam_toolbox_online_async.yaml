@@ -1,0 +1,55 @@
+# Copyright (c) 2026 Peppermint Robotics. All rights reserved.
+# slam_toolbox online async params — tuned for indoor mapping with RPLidar
+slam_toolbox:
+  ros__parameters:
+    # Solver
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_dogleg_type: TRADITIONAL_DOGLEG
+    ceres_loss_function: None
+
+    # Frames
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_link
+    scan_topic: /scan
+    use_scan_matching: true
+    mode: mapping
+
+    # Map
+    map_update_interval: 5.0
+    resolution: 0.05
+    max_laser_range: 12.0
+
+    # Motion thresholds
+    minimum_travel_distance: 0.1
+    minimum_travel_heading: 0.175
+
+    # Scan processing
+    scan_buffer_size: 10
+    scan_buffer_maximum_scan_distance: 10.0
+    link_match_minimum_response_fine: 0.1
+    link_scan_maximum_distance: 1.5
+
+    # Loop closure
+    loop_search_maximum_distance: 3.0
+    do_loop_closing: true
+    loop_match_minimum_chain_size: 10
+    loop_match_maximum_variance_coarse: 3.0
+    loop_match_minimum_response_coarse: 0.35
+    loop_match_minimum_response_fine: 0.45
+
+    # General
+    use_scan_barycenter: true
+    minimum_time_interval: 0.5
+    transform_timeout: 0.2
+    tf_buffer_duration: 30.0
+    stack_size_to_use: 40000000
+
+    # Serialized map saving/loading
+    map_file_name: ""
+    map_start_at_dock: true
+
+    use_sim_time: false

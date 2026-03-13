@@ -1,15 +1,10 @@
-# colcon / ROS2 build artifacts
 build/
 install/
 log/
-
-# ROS tooling / IDEs
+*.pyc
+__pycache__/
 .vscode/
 .idea/
-
-# Python
-__pycache__/
-*.pyc
-
-# OS
+*.swp
+*~
 .DS_Store

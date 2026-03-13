@@ -1,0 +1,4 @@
+# Waveshare Cobra Flex ESP32-S3 — consistent /dev/cobra_flex symlink
+# To install: sudo cp 99-cobra-flex.rules /etc/udev/rules.d/ && sudo udevadm control --reload-rules
+# Espressif ESP32-S3 USB-JTAG/serial: vendor 303a, product 1001
+SUBSYSTEM=="tty", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="1001", SYMLINK+="cobra_flex", MODE="0666"

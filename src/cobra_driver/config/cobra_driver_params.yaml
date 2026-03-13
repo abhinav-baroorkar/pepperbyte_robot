@@ -1,0 +1,16 @@
+cobra_driver_node:
+  ros__parameters:
+    # Set to "/dev/cobra_flex" once the udev rule (config/99-cobra-flex.rules)
+    # is installed — avoids /dev/ttyUSB* numbering changes when other USB
+    # devices are plugged in.
+    serial_port: "/dev/ttyUSB0"
+    baud_rate: 115200
+    wheel_diameter: 0.0739
+    track_width: 0.159
+    odom_frame: "odom"
+    base_frame: "base_link"
+    # publish_tf is false by default because robot_localization EKF publishes
+    # the odom->base_link transform in mapping modes. Set to true only when
+    # running without the EKF (e.g. teleop_only mode).
+    publish_tf: false
+    cmd_vel_timeout_ms: 2000

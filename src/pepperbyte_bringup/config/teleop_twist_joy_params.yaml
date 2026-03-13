@@ -1,0 +1,18 @@
+teleop_twist_joy_node:
+  ros__parameters:
+    axis_linear:
+      x: 1          # Left stick vertical (F710 XInput)
+    scale_linear:
+      x: 0.3        # Max 0.3 m/s forward — conservative for indoor mapping
+    axis_angular:
+      yaw: 0        # Left stick horizontal (F710 XInput)
+    scale_angular:
+      yaw: 1.0      # Max 1.0 rad/s turning
+    enable_button: 4   # LB button — must hold to drive
+    enable_turbo_button: 5  # RB button — hold for turbo
+    scale_linear_turbo:
+      x: 0.5        # Turbo: 0.5 m/s
+    scale_angular_turbo:
+      yaw: 1.5      # Turbo: 1.5 rad/s
+    require_enable_button: true
+    publish_stamped_twist: false

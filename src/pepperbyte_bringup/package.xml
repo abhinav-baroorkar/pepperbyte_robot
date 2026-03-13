@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>pepperbyte_bringup</name>
+  <version>0.1.0</version>
+  <description>Master launch files for the PepperByte scout mapping robot</description>
+  <maintainer email="engineering@peppermintrobotics.com">Peppermint Robotics</maintainer>
+  <license>Proprietary</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>cobra_driver</exec_depend>
+  <exec_depend>pepperbyte_description</exec_depend>
+  <exec_depend>pepperbyte_slam</exec_depend>
+  <exec_depend>pepperbyte_navigation</exec_depend>
+  <exec_depend>joy</exec_depend>
+  <exec_depend>teleop_twist_joy</exec_depend>
+  <exec_depend>twist_mux</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<!-- Copyright (c) 2026 Peppermint Robotics. All rights reserved. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pepperbyte">
+
+  <!-- ======================== Properties ======================== -->
+  <!-- Chassis: 250mm x 200mm x 80mm (L x W x H) -->
+  <xacro:property name="chassis_length"  value="0.250"/>
+  <xacro:property name="chassis_width"   value="0.200"/>
+  <xacro:property name="chassis_height"  value="0.080"/>
+  <xacro:property name="wheel_radius"    value="0.03695"/>
+  <xacro:property name="wheel_width"     value="0.030"/>
+  <xacro:property name="track_width"     value="0.159"/>
+  <xacro:property name="lidar_height"    value="0.150"/>
+  <xacro:property name="camera_height"   value="0.100"/>
+  <xacro:property name="camera_tilt"     value="${-3.14159/4.0}"/>  <!-- -45 deg pitch -->
+
+  <!-- ======================== Materials ======================== -->
+  <material name="dark_grey">
+    <color rgba="0.3 0.3 0.3 1.0"/>
+  </material>
+  <material name="black">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+  <material name="green">
+    <color rgba="0.2 0.8 0.2 1.0"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.2 0.2 0.8 1.0"/>
+  </material>
+
+  <!-- ======================== base_footprint ======================== -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <!-- base_link sits at wheel-axle height above ground -->
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ======================== base_link ======================== -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+      <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+      <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <origin xyz="0 0 ${chassis_height/2}" rpy="0 0 0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+  </link>
+
+  <!-- ======================== Wheel macro ======================== -->
+  <xacro:macro name="wheel" params="prefix y_offset">
+    <link name="${prefix}_wheel_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="${3.14159/2} 0 0"/>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="${3.14159/2} 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.2"/>
+        <origin xyz="0 0 0" rpy="${3.14159/2} 0 0"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <origin xyz="0 ${y_offset} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:wheel prefix="left"  y_offset="${track_width/2}"/>
+  <xacro:wheel prefix="right" y_offset="${-track_width/2}"/>
+
+  <!-- ======================== lidar_link ======================== -->
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.035" length="0.040"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="green"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.035" length="0.040"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.15"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <!-- Centred on top of chassis, 15cm above base_link -->
+    <origin xyz="0 0 ${lidar_height}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ======================== imu_link ======================== -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.02 0.005"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <!-- Centre of chassis, flat mounted -->
+    <origin xyz="0 0 ${chassis_height}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ======================== camera_link ======================== -->
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.03 0.10 0.025"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.03 0.10 0.025"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <!-- Forward-facing, 10cm above base_link, 45deg tilt down -->
+    <origin xyz="${chassis_length/2 - 0.02} 0 ${camera_height}" rpy="0 ${camera_tilt} 0"/>
+  </joint>
+
+</robot>
