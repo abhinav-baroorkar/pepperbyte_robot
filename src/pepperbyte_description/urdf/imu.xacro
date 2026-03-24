@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!-- Copyright (c) 2026 Peppermint Robotics. All rights reserved. -->
+<!-- BNO055 IMU — flat-mounted at top of chassis -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.020 0.020 0.005"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="blue"/>
+    </visual>
+    <inertial>
+      <mass value="0.010"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0"
+               iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <!-- Flat on top of the chassis (at chassis_height above base_link origin) -->
+    <origin xyz="0 0 ${chassis_height}" rpy="0 0 0"/>
+  </joint>
+
+</robot>

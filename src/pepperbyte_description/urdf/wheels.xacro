@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<!-- Copyright (c) 2026 Peppermint Robotics. All rights reserved. -->
+<!-- 4WD wheel macro + instantiation for FL, FR, RL, RR -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    Wheel macro
+    params:
+      prefix   — link/joint name prefix (front_left, front_right, rear_left, rear_right)
+      x_offset — longitudinal offset from base_link origin (m)
+      y_offset — lateral offset from base_link origin (m), positive = left
+  -->
+  <xacro:macro name="wheel" params="prefix x_offset y_offset">
+
+    <link name="${prefix}_wheel_link">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <!-- Rotate cylinder so its axis aligns with Y (roll axis) -->
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+      </collision>
+      <inertial>
+        <!--
+          Solid cylinder inertia, m=0.2 kg, r=0.03725 m, h=0.030 m.
+          Spinning axis is Y in the link frame, so:
+            ixx = izz = m/12*(3r²+h²) = 8.44e-5
+            iyy       = m/2 *r²       = 1.39e-4
+        -->
+        <mass value="${wheel_mass}"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia
+          ixx="0.0000844"
+          ixy="0" ixz="0"
+          iyy="0.0001388"
+          iyz="0"
+          izz="0.0000844"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <origin xyz="${x_offset} ${y_offset} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+
+  </xacro:macro>
+
+  <!-- ======================== 4-wheel instantiation ========================
+       x: ±wheelbase/2  = ±0.077 m
+       y: ±track_width/2 = ±0.11425 m  (positive Y = left side)
+  -->
+  <xacro:wheel prefix="front_left"
+               x_offset="${wheelbase/2}"
+               y_offset="${track_width/2}"/>
+
+  <xacro:wheel prefix="front_right"
+               x_offset="${wheelbase/2}"
+               y_offset="${-track_width/2}"/>
+
+  <xacro:wheel prefix="rear_left"
+               x_offset="${-wheelbase/2}"
+               y_offset="${track_width/2}"/>
+
+  <xacro:wheel prefix="rear_right"
+               x_offset="${-wheelbase/2}"
+               y_offset="${-track_width/2}"/>
+
+</robot>

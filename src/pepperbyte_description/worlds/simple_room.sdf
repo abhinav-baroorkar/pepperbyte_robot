@@ -1,0 +1,452 @@
+<?xml version="1.0" ?>
+<!-- Copyright (c) 2026 Peppermint Robotics. All rights reserved. -->
+<!--
+  Multi-room indoor environment for PepperByte SLAM testing.
+
+  Layout (all units metres, walls 0.2 m thick, 2.0 m tall):
+  ┌──────────────────────────────────────────────────────┐
+  │         Room 2  4 m × 4 m  centre (0, 7)            │
+  │   [cyl(0.8,7.8)]          [box(-0.8,6.2)]           │
+  └──────────┬──────────────────────┬────────────────────┘
+             │  N hallway 1 m × 2 m │
+  ┌──────────┴──────────────────────┴────────────────────┐
+  │                                                      │
+  │         Main Room  6 m × 6 m  centre (0, 0)         ├──┐
+  │  [box(-1,1.5)] [cyl(1.5,1.5)]                       │  │ E hallway
+  │  [cyl(-1.5,-1)] [box(1,-1.5)]                       │  │ 1 m × 2 m
+  │                                                      ├──┘
+  └──────────────────────────────────────────────────────┘
+                                        ┌────────────────────┐
+                                        │Room3 4m×4m (7,0)   │
+                                        │[cyl(7.8,0.8)]      │
+                                        │[box(6.2,-0.8)]     │
+                                        └────────────────────┘
+
+  Wall centre coordinates:
+    Main room   : x=±3.1 (E/W, inner h 6.0 m)  y=±3.1 (N/S, outer w 6.4 m)
+    N hallway   : side walls x=±0.6, span y 3.0→5.0
+    Room 2      : x=±2.1 (E/W, inner h 4.0 m)  y=4.9/9.1 (N/S, outer w 4.4 m)
+    E hallway   : side walls y=±0.6, span x 3.0→5.0
+    Room 3      : x=4.9/9.1 (E/W, inner h 4.0 m)  y=±2.1 (N/S, outer w 4.4 m)
+-->
+<sdf version="1.8">
+  <world name="multi_room">
+
+    <!-- ==================== Physics ==================== -->
+    <physics name="default_physics" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <!-- ==================== Required system plugins ==================== -->
+    <plugin filename="ignition-gazebo-physics-system"
+            name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="ignition-gazebo-user-commands-system"
+            name="ignition::gazebo::systems::UserCommands"/>
+    <plugin filename="ignition-gazebo-scene-broadcaster-system"
+            name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="ignition-gazebo-sensors-system"
+            name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- ==================== Lighting ==================== -->
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- ==================== Ground plane ==================== -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>25 25</size></plane>
+          </geometry>
+          <surface>
+            <friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>25 25</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================================================================
+         MAIN ROOM  (6 m × 6 m, centre 0 0)
+         Inner faces: x=±3.0, y=±3.0
+         N wall split for north hallway opening  x∈[-0.5, 0.5]
+         E wall split for east  hallway opening  y∈[-0.5, 0.5]
+    ================================================================ -->
+
+    <model name="wall_main_south">
+      <static>true</static><pose>0 -3.1 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>6.4 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>6.4 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- N wall — left of hallway opening: x from -3.2 to -0.5  len=2.7  cx=-1.85 -->
+    <model name="wall_main_north_left">
+      <static>true</static><pose>-1.85 3.1 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>2.7 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>2.7 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- N wall — right of hallway opening: x from 0.5 to 3.2  len=2.7  cx=1.85 -->
+    <model name="wall_main_north_right">
+      <static>true</static><pose>1.85 3.1 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>2.7 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>2.7 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_main_west">
+      <static>true</static><pose>-3.1 0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 6.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 6.0 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- E wall — south of hallway opening: y from -3.0 to -0.5  len=2.5  cy=-1.75 -->
+    <model name="wall_main_east_south">
+      <static>true</static><pose>3.1 -1.75 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 2.5 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 2.5 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- E wall — north of hallway opening: y from 0.5 to 3.0  len=2.5  cy=1.75 -->
+    <model name="wall_main_east_north">
+      <static>true</static><pose>3.1 1.75 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 2.5 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 2.5 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================================================================
+         NORTH HALLWAY  (1 m wide × 2 m long)
+         Inner x∈[-0.5, 0.5]  inner y∈[3.0, 5.0]
+         Side wall centres at x=±0.6, span y 3.0→5.0
+    ================================================================ -->
+
+    <model name="wall_hallway_north_west">
+      <static>true</static><pose>-0.6 4.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 2.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 2.0 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_hallway_north_east">
+      <static>true</static><pose>0.6 4.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 2.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 2.0 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================================================================
+         ROOM 2  (4 m × 4 m, centre 0 7)
+         Inner faces: x=±2.0, y=5.0 and 9.0
+         Wall centres: x=±2.1, y=4.9 and 9.1
+         S wall split for north hallway opening  x∈[-0.5, 0.5]
+    ================================================================ -->
+
+    <model name="wall_r2_north">
+      <static>true</static><pose>0 9.1 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.4 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>4.4 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- S wall — left of hallway: x from -2.2 to -0.5  len=1.7  cx=-1.35 -->
+    <model name="wall_r2_south_left">
+      <static>true</static><pose>-1.35 4.9 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.7 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>1.7 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- S wall — right of hallway: x from 0.5 to 2.2  len=1.7  cx=1.35 -->
+    <model name="wall_r2_south_right">
+      <static>true</static><pose>1.35 4.9 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.7 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>1.7 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_r2_west">
+      <static>true</static><pose>-2.1 7.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 4.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 4.0 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_r2_east">
+      <static>true</static><pose>2.1 7.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 4.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 4.0 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================================================================
+         EAST HALLWAY  (1 m wide × 2 m long)
+         Inner y∈[-0.5, 0.5]  inner x∈[3.0, 5.0]
+         Side wall centres at y=±0.6, span x 3.0→5.0
+    ================================================================ -->
+
+    <model name="wall_hallway_east_south">
+      <static>true</static><pose>4.0 -0.6 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>2.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>2.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_hallway_east_north">
+      <static>true</static><pose>4.0 0.6 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>2.0 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>2.0 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================================================================
+         ROOM 3  (4 m × 4 m, centre 7 0)
+         Inner faces: x=5.0 and 9.0, y=±2.0
+         Wall centres: x=4.9 and 9.1, y=±2.1
+         W wall split for east hallway opening  y∈[-0.5, 0.5]
+    ================================================================ -->
+
+    <!-- N/S walls cover corners: outer x range 4.8→9.2 = 4.4 m, cx=7.0 -->
+    <model name="wall_r3_north">
+      <static>true</static><pose>7.0 2.1 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.4 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>4.4 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_r3_south">
+      <static>true</static><pose>7.0 -2.1 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>4.4 0.2 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>4.4 0.2 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="wall_r3_east">
+      <static>true</static><pose>9.1 0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 4.0 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 4.0 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- W wall — south of hallway: y from -2.0 to -0.5  len=1.5  cy=-1.25 -->
+    <model name="wall_r3_west_south">
+      <static>true</static><pose>4.9 -1.25 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 1.5 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 1.5 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- W wall — north of hallway: y from 0.5 to 2.0  len=1.5  cy=1.25 -->
+    <model name="wall_r3_west_north">
+      <static>true</static><pose>4.9 1.25 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.2 1.5 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.2 1.5 2.0</size></box></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse><specular>0.1 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ================================================================
+         OBSTACLES
+    ================================================================ -->
+
+    <!-- === Main Room === -->
+    <model name="obs_main_cyl_1">
+      <static>true</static><pose>1.5 1.5 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><cylinder><radius>0.12</radius><length>2.0</length></cylinder></geometry></collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse><specular>0.2 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obs_main_cyl_2">
+      <static>true</static><pose>-1.5 -1.0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><cylinder><radius>0.12</radius><length>2.0</length></cylinder></geometry></collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse><specular>0.2 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obs_main_box_1">
+      <static>true</static><pose>1.0 -1.5 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.4 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 0.4 2.0</size></box></geometry>
+          <material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse><specular>0.1 0.1 0.2 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obs_main_box_2">
+      <static>true</static><pose>-1.0 1.5 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.4 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 0.4 2.0</size></box></geometry>
+          <material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse><specular>0.1 0.1 0.2 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- === Room 2 (centre 0, 7) — relative offsets applied === -->
+    <model name="obs_r2_cyl">
+      <static>true</static><pose>0.8 7.8 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><cylinder><radius>0.12</radius><length>2.0</length></cylinder></geometry></collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse><specular>0.2 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obs_r2_box">
+      <static>true</static><pose>-0.8 6.2 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.4 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 0.4 2.0</size></box></geometry>
+          <material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse><specular>0.1 0.1 0.2 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- === Room 3 (centre 7, 0) — relative offsets applied === -->
+    <model name="obs_r3_cyl">
+      <static>true</static><pose>7.8 0.8 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><cylinder><radius>0.12</radius><length>2.0</length></cylinder></geometry></collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.12</radius><length>2.0</length></cylinder></geometry>
+          <material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse><specular>0.2 0.1 0.1 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="obs_r3_box">
+      <static>true</static><pose>6.2 -0.8 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.4 0.4 2.0</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.4 0.4 2.0</size></box></geometry>
+          <material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse><specular>0.1 0.1 0.2 1</specular></material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

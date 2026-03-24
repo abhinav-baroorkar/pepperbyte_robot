@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!-- Copyright (c) 2026 Peppermint Robotics. All rights reserved. -->
+<!-- OAK-D Series 2 depth camera — front face, top edge, pointing straight forward -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.030 0.100 0.025"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.030 0.100 0.025"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.100"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <!--
+      Front face of chassis, top front edge, pointing straight forward.
+      X = chassis_length/2 = 0.1175 m (front face)
+      Z = chassis_height   = 0.101  m (top edge)
+    -->
+    <origin xyz="${chassis_length/2} 0 ${chassis_height}" rpy="0 0 0"/>
+  </joint>
+
+</robot>

@@ -1,0 +1,735 @@
+<?xml version="1.0" ?>
+<!--
+  Commercial Building World — PepperByte SLAM stress-test environment.
+  ~30m x 35m footprint, 12 rooms + hallways, 4 wings off a central hub.
+  All walls: 0.2m thick, 2.5m tall, grey (0.75 0.75 0.75).
+  Robot spawns at (0,0) in Main Hub centre.
+-->
+<sdf version="1.7">
+  <world name="commercial_building">
+
+    <physics name="default_physics" default="true" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <plugin filename="ignition-gazebo-physics-system"
+            name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="ignition-gazebo-user-commands-system"
+            name="ignition::gazebo::systems::UserCommands"/>
+    <plugin filename="ignition-gazebo-scene-broadcaster-system"
+            name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="ignition-gazebo-sensors-system"
+            name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- Sun -->
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+    </scene>
+
+    <!-- Ground plane (50x50, grey) -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>50 50</size></plane>
+          </geometry>
+          <surface>
+            <friction><ode><mu>1</mu><mu2>1</mu2></ode></friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane><normal>0 0 1</normal><size>50 50</size></plane>
+          </geometry>
+          <material>
+            <ambient>0.6 0.6 0.6 1</ambient>
+            <diffuse>0.6 0.6 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!--=================================================================
+        WALLS
+        Naming: wall_<room>_<side>_<piece>
+        All walls: z-centre = 1.25, height = 2.5
+        N/S walls (run E-W): size = (length, 0.2, 2.5)
+        E/W walls (run N-S): size = (0.2, length, 2.5)
+    =================================================================-->
+
+    <!-- ~~~ MAIN HUB  inner: x∈[-4,4]  y∈[-4,4] ~~~ -->
+    <!-- Hub North wall y=4, opening x∈[-0.75,0.75] -->
+    <model name="wall_hub_n_left"><static>true</static><pose>-2.375 4 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.25 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.25 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_hub_n_right"><static>true</static><pose>2.375 4 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.25 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.25 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- Hub South wall y=-4, opening x∈[-0.75,0.75] -->
+    <model name="wall_hub_s_left"><static>true</static><pose>-2.375 -4 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.25 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.25 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_hub_s_right"><static>true</static><pose>2.375 -4 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.25 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.25 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- Hub East wall x=4, opening y∈[-0.75,0.75] -->
+    <model name="wall_hub_e_bot"><static>true</static><pose>4 -2.375 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.25 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.25 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_hub_e_top"><static>true</static><pose>4 2.375 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.25 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.25 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- Hub West wall x=-4, opening y∈[-0.75,0.75] -->
+    <model name="wall_hub_w_bot"><static>true</static><pose>-4 -2.375 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.25 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.25 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_hub_w_top"><static>true</static><pose>-4 2.375 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.25 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.25 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ NORTH HALLWAY  inner: x∈[-0.75,0.75]  y∈[4,7] ~~~ -->
+    <model name="wall_nhall_west"><static>true</static><pose>-0.75 5.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_nhall_east"><static>true</static><pose>0.75 5.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM A (warehouse)  inner: x∈[-5,5]  y∈[7,15] ~~~ -->
+    <!-- A South y=7, opening x∈[-0.75,0.75] -->
+    <model name="wall_A_s_left"><static>true</static><pose>-2.875 7 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>4.25 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>4.25 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_A_s_right"><static>true</static><pose>2.875 7 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>4.25 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>4.25 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- A North y=15 -->
+    <model name="wall_A_n"><static>true</static><pose>0 15 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>10.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>10.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- A East x=5, opening y∈[12.5,13.5] -->
+    <model name="wall_A_e_bot"><static>true</static><pose>5 9.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 5.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 5.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_A_e_top"><static>true</static><pose>5 14.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- A West x=-5, opening y∈[12.5,13.5] -->
+    <model name="wall_A_w_bot"><static>true</static><pose>-5 9.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 5.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 5.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_A_w_top"><static>true</static><pose>-5 14.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM B HALLWAY  inner: x∈[5,7]  y∈[12.5,13.5] ~~~ -->
+    <model name="wall_Bhall_s"><static>true</static><pose>6 12.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_Bhall_n"><static>true</static><pose>6 13.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM B (small office)  inner: x∈[7,10]  y∈[12,15] ~~~ -->
+    <!-- B West x=7, opening y∈[12.5,13.5] -->
+    <model name="wall_B_w_bot"><static>true</static><pose>7 12.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 0.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 0.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_B_w_top"><static>true</static><pose>7 14.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_B_e"><static>true</static><pose>10 13.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_B_s"><static>true</static><pose>8.5 12 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_B_n"><static>true</static><pose>8.5 15 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM C HALLWAY  inner: x∈[-7,-5]  y∈[12.5,13.5] ~~~ -->
+    <model name="wall_Chall_s"><static>true</static><pose>-6 12.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_Chall_n"><static>true</static><pose>-6 13.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM C (small storage)  inner: x∈[-10,-7]  y∈[11,15] ~~~ -->
+    <!-- C East x=-7, opening y∈[12.5,13.5] -->
+    <model name="wall_C_e_bot"><static>true</static><pose>-7 11.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_C_e_top"><static>true</static><pose>-7 14.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_C_w"><static>true</static><pose>-10 13 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 4.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 4.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_C_s"><static>true</static><pose>-8.5 11 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_C_n"><static>true</static><pose>-8.5 15 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ SOUTH HALLWAY  inner: x∈[-0.75,0.75]  y∈[-7,-4] ~~~ -->
+    <model name="wall_shall_west"><static>true</static><pose>-0.75 -5.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_shall_east"><static>true</static><pose>0.75 -5.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM D (meeting room)  inner: x∈[-3,3]  y∈[-12,-7] ~~~ -->
+    <!-- D North y=-7, opening x∈[-0.75,0.75] -->
+    <model name="wall_D_n_left"><static>true</static><pose>-1.875 -7 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.25 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.25 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_D_n_right"><static>true</static><pose>1.875 -7 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.25 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.25 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- D South y=-12, opening x∈[-0.6,0.6] -->
+    <model name="wall_D_s_left"><static>true</static><pose>-1.8 -12 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.4 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.4 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_D_s_right"><static>true</static><pose>1.8 -12 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.4 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.4 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- D East x=3, opening y∈[-10.25,-9.25] -->
+    <model name="wall_D_e_top"><static>true</static><pose>3 -8.125 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.25 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.25 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_D_e_bot"><static>true</static><pose>3 -11.125 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.75 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.75 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- D West x=-3 -->
+    <model name="wall_D_w"><static>true</static><pose>-3 -9.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 5.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 5.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM E HALLWAY  inner: x∈[3,4.5]  y∈[-10.25,-9.25] ~~~ -->
+    <model name="wall_Ehall_n"><static>true</static><pose>3.75 -9.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.5 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.5 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_Ehall_s"><static>true</static><pose>3.75 -10.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.5 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.5 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM E (narrow corridor)  inner: x∈[4.5,12.5]  y∈[-10.75,-8.25] ~~~ -->
+    <!-- E West x=4.5, opening y∈[-10.25,-9.25] -->
+    <model name="wall_E_w_top"><static>true</static><pose>4.5 -8.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_E_w_bot"><static>true</static><pose>4.5 -10.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 0.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 0.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_E_e"><static>true</static><pose>12.5 -9.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_E_n"><static>true</static><pose>8.5 -8.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>8.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>8.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_E_s"><static>true</static><pose>8.5 -10.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>8.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>8.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM F HALLWAY  inner: x∈[-0.6,0.6]  y∈[-14,-12] ~~~ -->
+    <model name="wall_Fhall_w"><static>true</static><pose>-0.6 -13 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_Fhall_e"><static>true</static><pose>0.6 -13 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM F (large storage)  inner: x∈[-2.5,2.5]  y∈[-20,-14] ~~~ -->
+    <!-- F North y=-14, opening x∈[-0.6,0.6] -->
+    <model name="wall_F_n_left"><static>true</static><pose>-1.55 -14 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.9 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.9 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_F_n_right"><static>true</static><pose>1.55 -14 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.9 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.9 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_F_s"><static>true</static><pose>0 -20 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>5.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>5.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_F_e"><static>true</static><pose>2.5 -17 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 6.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 6.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_F_w"><static>true</static><pose>-2.5 -17 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 6.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 6.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ EAST HALLWAY  inner: x∈[4,7]  y∈[-0.75,0.75] ~~~ -->
+    <model name="wall_ehall_s"><static>true</static><pose>5.5 -0.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_ehall_n"><static>true</static><pose>5.5 0.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM G (lab)  inner: x∈[7,13]  y∈[-3,3] ~~~ -->
+    <!-- G West x=7, opening y∈[-0.75,0.75] -->
+    <model name="wall_G_w_bot"><static>true</static><pose>7 -1.875 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.25 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.25 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_G_w_top"><static>true</static><pose>7 1.875 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.25 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.25 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_G_e"><static>true</static><pose>13 0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 6.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 6.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- G South y=-3, opening x∈[9.55,10.45] -->
+    <model name="wall_G_s_left"><static>true</static><pose>8.275 -3 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.55 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.55 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_G_s_right"><static>true</static><pose>11.725 -3 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.55 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.55 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- G North y=3, opening x∈[9.4,10.6] -->
+    <model name="wall_G_n_left"><static>true</static><pose>8.2 3 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.4 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.4 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_G_n_right"><static>true</static><pose>11.8 3 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.4 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.4 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM H HALLWAY  inner: x∈[9.55,10.45]  y∈[-4.5,-3] ~~~ -->
+    <model name="wall_Hhall_w"><static>true</static><pose>9.55 -3.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_Hhall_e"><static>true</static><pose>10.45 -3.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM H (utility)  inner: x∈[8.75,11.25]  y∈[-7,-4.5] ~~~ -->
+    <!-- H North y=-4.5, opening x∈[9.55,10.45] -->
+    <model name="wall_H_n_left"><static>true</static><pose>9.15 -4.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.8 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.8 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_H_n_right"><static>true</static><pose>10.85 -4.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.8 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.8 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_H_s"><static>true</static><pose>10 -7 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.5 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.5 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_H_e"><static>true</static><pose>11.25 -5.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_H_w"><static>true</static><pose>8.75 -5.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM I HALLWAY  inner: x∈[9.4,10.6]  y∈[3,5] ~~~ -->
+    <model name="wall_Ihall_w"><static>true</static><pose>9.4 4 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_Ihall_e"><static>true</static><pose>10.6 4 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM I (large open area)  inner: x∈[6,15]  y∈[5,12] ~~~ -->
+    <!-- I South y=5, opening x∈[9.4,10.6] -->
+    <model name="wall_I_s_left"><static>true</static><pose>7.7 5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.4 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.4 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_I_s_right"><static>true</static><pose>12.8 5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>4.4 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>4.4 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_I_n"><static>true</static><pose>10.5 12 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>9.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>9.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_I_e"><static>true</static><pose>15 8.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 7.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 7.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_I_w"><static>true</static><pose>6 8.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 7.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 7.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ WEST HALLWAY  inner: x∈[-7,-4]  y∈[-0.75,0.75] ~~~ -->
+    <model name="wall_whall_s"><static>true</static><pose>-5.5 -0.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_whall_n"><static>true</static><pose>-5.5 0.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM J (office)  inner: x∈[-12,-7]  y∈[-2.5,2.5] ~~~ -->
+    <!-- J East x=-7, opening y∈[-0.75,0.75] -->
+    <model name="wall_J_e_bot"><static>true</static><pose>-7 -1.625 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.75 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.75 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_J_e_top"><static>true</static><pose>-7 1.625 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 1.75 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.75 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_J_w"><static>true</static><pose>-12 0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 5.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 5.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_J_s"><static>true</static><pose>-9.5 -2.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>5.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>5.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ SHARED WALL at y=2.5  (J north / K south)
+         x from -13.5 to -6.5, opening x∈[-10,-9] ~~~ -->
+    <model name="wall_JK_s_left"><static>true</static><pose>-11.75 2.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.5 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.5 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_JK_s_right"><static>true</static><pose>-7.75 2.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.5 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.5 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM K (long narrow corridor)  inner: x∈[-13.5,-6.5]  y∈[2.5,4.5] ~~~ -->
+    <model name="wall_K_n"><static>true</static><pose>-10 4.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>7.0 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>7.0 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_K_e"><static>true</static><pose>-6.5 3.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 2.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 2.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <!-- K west wall is absent — Room L connects directly -->
+
+    <!-- ~~~ ROOM L (alcove)  inner: x∈[-16,-13.5]  y∈[2.0,5.0] ~~~ -->
+    <!-- L East x=-13.5, opening y∈[2.5,4.5] (Room K height) — small caps only -->
+    <model name="wall_L_e_bot"><static>true</static><pose>-13.5 2.25 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 0.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 0.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_L_e_top"><static>true</static><pose>-13.5 4.75 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 0.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 0.5 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_L_w"><static>true</static><pose>-16 3.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.2 3.0 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 3.0 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_L_s"><static>true</static><pose>-14.75 2.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.5 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.5 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+    <model name="wall_L_n"><static>true</static><pose>-14.75 5.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.5 0.2 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.5 0.2 2.5</size></box></geometry><material><ambient>0.75 0.75 0.75 1</ambient><diffuse>0.75 0.75 0.75 1</diffuse></material></visual></link></model>
+
+    <!--=================================================================
+        OBSTACLES
+        Colours: red=0.8 0.2 0.2, blue=0.2 0.2 0.8,
+                 yellow=0.9 0.8 0.1, orange=0.9 0.5 0.1
+        z = height/2
+    =================================================================-->
+
+    <!-- ~~~ MAIN HUB obstacles ~~~ -->
+    <!-- 4 orange large posts near corners -->
+    <model name="obs_hub_post_sw"><static>true</static><pose>-3 -3 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry><material><ambient>0.9 0.5 0.1 1</ambient><diffuse>0.9 0.5 0.1 1</diffuse></material></visual></link></model>
+    <model name="obs_hub_post_se"><static>true</static><pose>3 -3 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry><material><ambient>0.9 0.5 0.1 1</ambient><diffuse>0.9 0.5 0.1 1</diffuse></material></visual></link></model>
+    <model name="obs_hub_post_ne"><static>true</static><pose>3 3 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry><material><ambient>0.9 0.5 0.1 1</ambient><diffuse>0.9 0.5 0.1 1</diffuse></material></visual></link></model>
+    <model name="obs_hub_post_nw"><static>true</static><pose>-3 3 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry><material><ambient>0.9 0.5 0.1 1</ambient><diffuse>0.9 0.5 0.1 1</diffuse></material></visual></link></model>
+    <!-- 2 blue boxes offset from centre -->
+    <model name="obs_hub_box1"><static>true</static><pose>1.0 0.8 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 2.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_hub_box2"><static>true</static><pose>-1.2 -0.7 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 2.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 2.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <!-- 1 yellow partition -->
+    <model name="obs_hub_partition"><static>true</static><pose>-2.5 -2.0 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.0 0.1 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.0 0.1 2.0</size></box></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM A (warehouse) obstacles ~~~ -->
+    <!-- 6 blue boxes -->
+    <model name="obs_A_box1"><static>true</static><pose>-3 9 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.4 0.4 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.4 0.4 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_A_box2"><static>true</static><pose>2 10 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.6 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.6 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_A_box3"><static>true</static><pose>-1 12.5 0.9 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 1.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 1.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_A_box4"><static>true</static><pose>3.5 13.5 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.8 0.4 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.8 0.4 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_A_box5"><static>true</static><pose>-4 11.5 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.4 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.4 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_A_box6"><static>true</static><pose>1.5 8.5 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.4 0.8 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.4 0.8 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <!-- 4 red cylinders -->
+    <model name="obs_A_cyl1"><static>true</static><pose>-2 8.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_A_cyl2"><static>true</static><pose>1 11.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_A_cyl3"><static>true</static><pose>4 9.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_A_cyl4"><static>true</static><pose>-4.5 13 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <!-- 2 yellow partitions (shelving rows) -->
+    <model name="obs_A_part1"><static>true</static><pose>0 9.5 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.1 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.1 2.0</size></box></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material></visual></link></model>
+    <model name="obs_A_part2"><static>true</static><pose>-2 12.5 1.0 0 0 1.5708</pose>
+      <link name="link"><collision name="c"><geometry><box><size>3.0 0.1 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.1 2.0</size></box></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material></visual></link></model>
+    <!-- 1 orange large post -->
+    <model name="obs_A_post"><static>true</static><pose>2.5 11 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry><material><ambient>0.9 0.5 0.1 1</ambient><diffuse>0.9 0.5 0.1 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM B (small office) obstacles ~~~ -->
+    <model name="obs_B_box1"><static>true</static><pose>8.0 13.2 0.5 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.4 0.6 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.4 0.6 1.0</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_B_box2"><static>true</static><pose>9.0 14.3 0.5 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.4 0.6 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.4 0.6 1.0</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_B_cyl1"><static>true</static><pose>9.2 12.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.1</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.1</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM C (small storage) obstacles ~~~ -->
+    <model name="obs_C_box1"><static>true</static><pose>-9 12 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_C_box2"><static>true</static><pose>-8.2 13.5 0.6 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.4 1.2</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.4 1.2</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_C_box3"><static>true</static><pose>-7.7 12.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.4 0.4 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.4 0.4 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_C_cyl1"><static>true</static><pose>-9.5 14 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM D (meeting room) obstacles ~~~ -->
+    <!-- Centre table -->
+    <model name="obs_D_table"><static>true</static><pose>0 -9.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.5 0.8 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.5 0.8 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <!-- 4 chairs around table -->
+    <model name="obs_D_chair1"><static>true</static><pose>-0.9 -9.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.3 0.3 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.3 0.3 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_D_chair2"><static>true</static><pose>0.9 -9.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.3 0.3 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.3 0.3 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_D_chair3"><static>true</static><pose>0 -10.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.3 0.3 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.3 0.3 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_D_chair4"><static>true</static><pose>0 -8.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.3 0.3 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.3 0.3 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <!-- 2 cylinders near walls -->
+    <model name="obs_D_cyl1"><static>true</static><pose>-2.5 -11.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_D_cyl2"><static>true</static><pose>2.5 -7.8 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM E (narrow corridor, slalom) obstacles ~~~ -->
+    <!-- 3 staggered blue boxes — alternate left/right to force weaving -->
+    <model name="obs_E_box1"><static>true</static><pose>6.0 -8.7 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_E_box2"><static>true</static><pose>8.5 -10.3 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_E_box3"><static>true</static><pose>11.0 -8.7 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <!-- 2 end cylinders -->
+    <model name="obs_E_cyl1"><static>true</static><pose>5.0 -9.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_E_cyl2"><static>true</static><pose>12.0 -9.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM F (large storage) obstacles ~~~ -->
+    <model name="obs_F_box1"><static>true</static><pose>-1.5 -15.5 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.6 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.6 2.0</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_F_box2"><static>true</static><pose>1.5 -15.5 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.6 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.6 2.0</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_F_box3"><static>true</static><pose>-1.5 -18.5 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.6 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.6 2.0</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_F_box4"><static>true</static><pose>1.5 -18.5 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.6 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.6 2.0</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_F_cyl1"><static>true</static><pose>0 -16.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_F_cyl2"><static>true</static><pose>-2.0 -19.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_F_cyl3"><static>true</static><pose>2.0 -17.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_F_part"><static>true</static><pose>0 -19.0 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.0 0.1 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.0 0.1 2.0</size></box></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM G (lab) obstacles ~~~ -->
+    <model name="obs_G_box1"><static>true</static><pose>8.5 -2.0 0.6 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.0 0.6 1.2</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.0 0.6 1.2</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_G_box2"><static>true</static><pose>11.5 2.0 0.6 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.0 0.6 1.2</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.0 0.6 1.2</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <!-- L-shaped cylinder pattern -->
+    <model name="obs_G_cyl1"><static>true</static><pose>8.0 1.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_G_cyl2"><static>true</static><pose>9.0 1.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_G_cyl3"><static>true</static><pose>9.0 0.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_G_part"><static>true</static><pose>11.5 -1.0 1.0 0 0 1.5708</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.0 0.1 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.0 0.1 2.0</size></box></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM H (utility) obstacles ~~~ -->
+    <model name="obs_H_box1"><static>true</static><pose>9.5 -6.0 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.4 0.4 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.4 0.4 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_H_cyl1"><static>true</static><pose>10.8 -5.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.1</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.1</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM I (large open area) obstacles ~~~ -->
+    <!-- 8 red cylinders in two rows -->
+    <model name="obs_I_cyl1"><static>true</static><pose>7.5 6.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_I_cyl2"><static>true</static><pose>7.5 8.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_I_cyl3"><static>true</static><pose>7.5 9.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_I_cyl4"><static>true</static><pose>7.5 11.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_I_cyl5"><static>true</static><pose>12.5 7.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_I_cyl6"><static>true</static><pose>12.5 8.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_I_cyl7"><static>true</static><pose>12.5 10.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_I_cyl8"><static>true</static><pose>12.5 11.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <!-- 4 blue boxes -->
+    <model name="obs_I_box1"><static>true</static><pose>9.5 6.5 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.6 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.6 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_I_box2"><static>true</static><pose>11.0 7.5 0.9 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.8 0.5 1.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.8 0.5 1.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_I_box3"><static>true</static><pose>10.0 9.5 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_I_box4"><static>true</static><pose>13.5 9.5 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.6 0.6 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.6 0.6 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <!-- 2 yellow long partitions -->
+    <model name="obs_I_part1"><static>true</static><pose>10.5 7.0 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>4.0 0.1 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>4.0 0.1 2.0</size></box></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material></visual></link></model>
+    <model name="obs_I_part2"><static>true</static><pose>10.5 10.5 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>4.0 0.1 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>4.0 0.1 2.0</size></box></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material></visual></link></model>
+    <!-- 2 orange large posts -->
+    <model name="obs_I_post1"><static>true</static><pose>8.5 11.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry><material><ambient>0.9 0.5 0.1 1</ambient><diffuse>0.9 0.5 0.1 1</diffuse></material></visual></link></model>
+    <model name="obs_I_post2"><static>true</static><pose>13.0 6.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.3</radius><length>2.5</length></cylinder></geometry><material><ambient>0.9 0.5 0.1 1</ambient><diffuse>0.9 0.5 0.1 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM J (office) obstacles ~~~ -->
+    <model name="obs_J_box1"><static>true</static><pose>-11.0 -1.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.0 0.6 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.0 0.6 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_J_box2"><static>true</static><pose>-9.0 1.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.0 0.6 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.0 0.6 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_J_box3"><static>true</static><pose>-8.0 -1.5 0.4 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>1.0 0.6 0.8</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.0 0.6 0.8</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_J_cyl1"><static>true</static><pose>-11.5 1.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_J_cyl2"><static>true</static><pose>-8.5 -2.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_J_part"><static>true</static><pose>-10.0 0 1.0 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>2.0 0.1 2.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.0 0.1 2.0</size></box></geometry><material><ambient>0.9 0.8 0.1 1</ambient><diffuse>0.9 0.8 0.1 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM K (narrow corridor) obstacles — alternating sides ~~~ -->
+    <model name="obs_K_cyl1"><static>true</static><pose>-12.5 3.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_K_cyl2"><static>true</static><pose>-11.0 4.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_K_cyl3"><static>true</static><pose>-9.5 3.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+    <model name="obs_K_cyl4"><static>true</static><pose>-8.0 4.0 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.12</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+
+    <!-- ~~~ ROOM L (alcove) obstacles ~~~ -->
+    <model name="obs_L_box1"><static>true</static><pose>-15.5 3.0 0.75 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.5 0.5 1.5</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.5 0.5 1.5</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_L_box2"><static>true</static><pose>-14.5 4.5 0.6 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><box><size>0.4 0.4 1.2</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.4 0.4 1.2</size></box></geometry><material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material></visual></link></model>
+    <model name="obs_L_cyl1"><static>true</static><pose>-15.0 2.5 1.25 0 0 0</pose>
+      <link name="link"><collision name="c"><geometry><cylinder><radius>0.1</radius><length>2.5</length></cylinder></geometry></collision>
+      <visual name="v"><geometry><cylinder><radius>0.1</radius><length>2.5</length></cylinder></geometry><material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual></link></model>
+
+  </world>
+</sdf>

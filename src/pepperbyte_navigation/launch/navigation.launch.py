@@ -42,9 +42,9 @@ def generate_launch_description():
         ),
 
         Node(
-            package='nav2_recoveries',
-            executable='recoveries_server',
-            name='recoveries_server',
+            package='nav2_behaviors',
+            executable='behavior_server',
+            name='behavior_server',
             output='screen',
             parameters=[nav2_params, {'use_sim_time': use_sim_time}],
         ),
