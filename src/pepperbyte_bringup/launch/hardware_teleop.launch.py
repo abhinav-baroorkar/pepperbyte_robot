@@ -1,23 +1,21 @@
 # Copyright (c) 2026 Peppermint Robotics. All rights reserved.
 #
-# Real hardware teleop — joystick driving only, no SLAM or Nav2.
-# Launches: robot_state_publisher, cobra_driver, joy, teleop_twist_joy, twist_mux.
+# Real hardware teleop — keyboard driving only, no SLAM or Nav2.
+# Launches: robot_state_publisher, cobra_driver, teleop_twist_keyboard, twist_mux.
 import os
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import ExecuteProcess, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    bringup_share = get_package_share_directory('pepperbyte_bringup')
     cobra_share = get_package_share_directory('cobra_driver')
     desc_share = get_package_share_directory('pepperbyte_description')
+    bringup_share = get_package_share_directory('pepperbyte_bringup')
 
     cobra_params = os.path.join(cobra_share, 'config', 'cobra_driver_params.yaml')
-    joy_config = os.path.join(bringup_share, 'config', 'joy_params.yaml')
-    teleop_config = os.path.join(bringup_share, 'config', 'teleop_twist_joy_params.yaml')
     twist_mux_config = os.path.join(bringup_share, 'config', 'twist_mux.yaml')
 
     return LaunchDescription([
@@ -42,23 +40,19 @@ def generate_launch_description():
             ],
         ),
 
-        # --- Joystick driver ---
-        Node(
-            package='joy',
-            executable='joy_node',
-            name='joy_node',
+        # --- Keyboard teleop in a dedicated xterm window ---
+        # Using ExecuteProcess instead of Node+prefix so we can fully control the
+        # bash -c command string. Node prefix='xterm -e' breaks because launch
+        # appends the executable path after the prefix — bash -c never sees it.
+        ExecuteProcess(
+            cmd=[
+                'xterm', '-e', 'bash', '-c',
+                'source /opt/ros/humble/setup.bash && '
+                'source ~/pepperbyte_ws/pepperbyte_robot/install/setup.bash && '
+                'ros2 run teleop_twist_keyboard teleop_twist_keyboard '
+                '--ros-args -r cmd_vel:=joy_vel',
+            ],
             output='screen',
-            parameters=[joy_config],
-        ),
-
-        # --- Teleop twist joy (output → joy_vel for twist_mux) ---
-        Node(
-            package='teleop_twist_joy',
-            executable='teleop_node',
-            name='teleop_twist_joy_node',
-            output='screen',
-            parameters=[teleop_config],
-            remappings=[('cmd_vel', 'joy_vel')],
         ),
 
         # --- Twist mux (joy_vel priority 20 → /cmd_vel) ---

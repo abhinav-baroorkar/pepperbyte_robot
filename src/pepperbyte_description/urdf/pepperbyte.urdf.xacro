@@ -56,6 +56,5 @@
   <xacro:include filename="$(find pepperbyte_description)/urdf/lidar.xacro"/>
   <xacro:include filename="$(find pepperbyte_description)/urdf/imu.xacro"/>
   <xacro:include filename="$(find pepperbyte_description)/urdf/camera.xacro"/>
-  <xacro:include filename="$(find pepperbyte_description)/urdf/gazebo.xacro"/>
 
 </robot>

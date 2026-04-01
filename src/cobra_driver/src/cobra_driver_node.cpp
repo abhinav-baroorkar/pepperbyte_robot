@@ -15,6 +15,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "nav_msgs/msg/odometry.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 #include "std_msgs/msg/float32.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/transform_broadcaster.h"
@@ -54,6 +55,7 @@ public:
     // --------------- Publishers ---------------
     odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("/odom", 10);
     battery_pub_ = this->create_publisher<std_msgs::msg::Float32>("/battery_voltage", 10);
+    joint_state_pub_ = this->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
 
     // --------------- TF broadcaster ---------------
     tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -75,6 +77,21 @@ public:
       this->get_logger(), "Opened serial port %s at %d baud",
       serial_port_name_.c_str(), baud_rate_);
 
+    // Enable all 4 DDSM400 motors and set speed-loop mode (T:12).
+    // The firmware sends this during its own setup(), but if 12V power was
+    // applied after USB boot the motors were unpowered during that sequence
+    // and remain disabled. Sending T:12 here re-runs motor_enabled() safely.
+    serial_.write("{\"T\":12}\n");
+    RCLCPP_INFO(this->get_logger(), "Sent motor enable (T:12)");
+
+    // Immediately zero the motor setpoints. The ESP32's ddsm_spd_1..4 persist
+    // in RAM across cobra_driver restarts. After T:12 re-enables the motors,
+    // the firmware's ddsm_ctrl_loop() would instantly drive them at the stale
+    // setpoints. Sending zero here clears those before the loop runs.
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    serial_.write("{\"T\":13,\"X\":0,\"Z\":0}\n");
+    RCLCPP_INFO(this->get_logger(), "Sent initial zero velocity");
+
     // Enable continuous feedback stream from the ESP32 (T:131, cmd:1)
     serial_.write("{\"T\":131,\"cmd\":1}\n");
     RCLCPP_INFO(this->get_logger(), "Enabled ESP32 feedback stream");
@@ -90,6 +107,10 @@ public:
     keepalive_timer_ = this->create_wall_timer(
       std::chrono::milliseconds(cmd_vel_timeout_ms_ / 2),
       std::bind(&CobraDriverNode::keepaliveCallback, this));
+
+    // Initialise keepalive baseline to now so the first keepalive interval
+    // is measured from startup, not from epoch zero.
+    last_cmd_vel_time_ = this->now();
 
     RCLCPP_INFO(this->get_logger(), "cobra_driver_node initialised");
   }
@@ -216,12 +237,11 @@ private:
     auto now = this->now();
 
     if (!odom_initialized_) {
-      // First reading — just store the baseline values
       prev_odl_cm_ = odl_cm;
       prev_odr_cm_ = odr_cm;
       prev_odom_time_ = now;
       odom_initialized_ = true;
-      return;
+      // Fall through — publish zero odom and joint states on first reading
     }
 
     // Compute deltas in metres
@@ -243,6 +263,11 @@ private:
     // Normalise theta to [-PI, PI]
     while (theta_ > M_PI) { theta_ -= 2.0 * M_PI; }
     while (theta_ < -M_PI) { theta_ += 2.0 * M_PI; }
+
+    // Accumulate wheel angles from encoder deltas
+    const double wheel_radius = wheel_diameter_ / 2.0;
+    left_wheel_angle_rad_  += delta_left_m  / wheel_radius;
+    right_wheel_angle_rad_ += delta_right_m / wheel_radius;
 
     // Compute velocities
     double dt = (now - prev_odom_time_).seconds();
@@ -311,6 +336,32 @@ private:
     odom_msg.twist.covariance[35] = 0.03;  // angular z
 
     odom_pub_->publish(odom_msg);
+
+    // ---- Publish joint states from encoder data ----
+    double left_vel_rad  = (dt > 0.0) ? (delta_left_m  / wheel_radius / dt) : 0.0;
+    double right_vel_rad = (dt > 0.0) ? (delta_right_m / wheel_radius / dt) : 0.0;
+
+    auto js_msg = sensor_msgs::msg::JointState();
+    js_msg.header.stamp = now;
+    js_msg.name = {
+      "front_left_wheel_joint",
+      "rear_left_wheel_joint",
+      "front_right_wheel_joint",
+      "rear_right_wheel_joint"
+    };
+    js_msg.position = {
+      left_wheel_angle_rad_,
+      left_wheel_angle_rad_,
+      right_wheel_angle_rad_,
+      right_wheel_angle_rad_
+    };
+    js_msg.velocity = {
+      left_vel_rad,
+      left_vel_rad,
+      right_vel_rad,
+      right_vel_rad
+    };
+    joint_state_pub_->publish(js_msg);
   }
 
   // =====================================================================
@@ -350,9 +401,14 @@ private:
   double y_{0.0};
   double theta_{0.0};
 
+  // Wheel angle accumulators (radians, unbounded)
+  double left_wheel_angle_rad_{0.0};
+  double right_wheel_angle_rad_{0.0};
+
   // ROS interfaces
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
   rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr battery_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_;
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
   std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
 };

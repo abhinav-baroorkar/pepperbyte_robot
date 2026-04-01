@@ -10,4 +10,4 @@ cobra_driver_node:
     # the odom->base_link transform in mapping modes. Set to true only when
     # running without the EKF (e.g. teleop_only mode).
     publish_tf: false
-    cmd_vel_timeout_ms: 2000
+    cmd_vel_timeout_ms: 300
