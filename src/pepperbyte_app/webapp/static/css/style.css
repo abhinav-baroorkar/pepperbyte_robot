@@ -1,0 +1,55 @@
+/* PepperByte Control App — custom styles */
+
+/* System font stack */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Remove default canvas outline */
+canvas { outline: none; }
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #16213e; }
+::-webkit-scrollbar-thumb { background: #3a3a5c; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #00d4ff; }
+
+/* Mode button active glow */
+.mode-btn-active {
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+}
+
+/* Pulse animation for mapping active */
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulse-green { animation: pulse-green 1.5s ease-in-out infinite; }
+
+/* Map canvas cursor */
+.canvas-grab { cursor: grab; }
+.canvas-grab:active { cursor: grabbing; }
+.canvas-crosshair { cursor: crosshair; }
+
+/* Panel card */
+.panel-card {
+  background: rgba(22, 33, 62, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.75rem;
+}
+
+/* Input fields */
+input[type="text"] {
+  background: #0f1629;
+  border: 1px solid #3a3a5c;
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  color: white;
+  font-size: 0.875rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input[type="text"]:focus {
+  border-color: #00d4ff;
+}

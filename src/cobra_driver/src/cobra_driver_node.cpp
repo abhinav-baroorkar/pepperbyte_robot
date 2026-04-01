@@ -33,13 +33,13 @@ public:
   : Node("cobra_driver_node")
   {
     // --------------- Parameter declarations ---------------
-    this->declare_parameter<std::string>("serial_port", "/dev/ttyUSB0");
+    this->declare_parameter<std::string>("serial_port", "/dev/cobra_flex");
     this->declare_parameter<int>("baud_rate", 115200);
-    this->declare_parameter<double>("wheel_diameter", 0.0739);
-    this->declare_parameter<double>("track_width", 0.159);
+    this->declare_parameter<double>("wheel_diameter", 0.0745);
+    this->declare_parameter<double>("track_width", 0.2285);
     this->declare_parameter<std::string>("odom_frame", "odom");
     this->declare_parameter<std::string>("base_frame", "base_link");
-    this->declare_parameter<bool>("publish_tf", true);
+    this->declare_parameter<bool>("publish_tf", false);
     this->declare_parameter<int>("cmd_vel_timeout_ms", 2000);
 
     serial_port_name_ = this->get_parameter("serial_port").as_string();
@@ -328,13 +328,13 @@ private:
   std::atomic<bool> serial_thread_running_{false};
 
   // Robot parameters
-  double wheel_diameter_{0.0739};
-  double track_width_{0.159};
+  double wheel_diameter_{0.0745};
+  double track_width_{0.2285};
 
   // Frame IDs
   std::string odom_frame_{"odom"};
   std::string base_frame_{"base_link"};
-  bool publish_tf_{true};
+  bool publish_tf_{false};
 
   // Keepalive
   int cmd_vel_timeout_ms_{2000};
